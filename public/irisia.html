@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>IrisIA — Copiloto Comercial com IA</title>
+<meta name="description" content="IrisIA: assistente comercial com IA para automação de vendas, negociação e gestão de leads em tempo real." />
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#070912;
+    --bg-2:#0c1020;
+    --surface:#111634;
+    --surface-2:#161c40;
+    --border:rgba(255,255,255,.08);
+    --border-strong:rgba(255,255,255,.14);
+    --text:#e8ecff;
+    --muted:#8a93c2;
+    --primary:#6c5cff;
+    --primary-2:#a78bfa;
+    --accent:#22d3ee;
+    --success:#22c55e;
+    --warning:#f59e0b;
+    --danger:#ef4444;
+    --gradient-primary: linear-gradient(135deg,#6c5cff 0%, #a78bfa 50%, #22d3ee 100%);
+    --gradient-soft: linear-gradient(135deg, rgba(108,92,255,.18), rgba(34,211,238,.10));
+    --shadow-glow: 0 20px 60px -20px rgba(108,92,255,.55);
+    --radius: 16px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;height:100%}
+  body{
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    background:
+      radial-gradient(1200px 600px at 80% -10%, rgba(108,92,255,.25), transparent 60%),
+      radial-gradient(900px 500px at -10% 20%, rgba(34,211,238,.18), transparent 60%),
+      var(--bg);
+    color:var(--text);
+    -webkit-font-smoothing:antialiased;
+    overflow:hidden;
+  }
+  h1,h2,h3,h4{font-family:'Space Grotesk',sans-serif;letter-spacing:-.02em;margin:0}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,textarea,select{font-family:inherit}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:rgba(255,255,255,.08);border-radius:10px}
+  ::-webkit-scrollbar-thumb:hover{background:rgba(255,255,255,.15)}
+
+  /* Layout */
+  .app{
+    display:grid;
+    grid-template-columns: 260px 1fr 360px;
+    height:100vh;
+  }
+
+  /* Sidebar */
+  .sidebar{
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    border-right:1px solid var(--border);
+    padding:22px 16px;
+    display:flex;flex-direction:column;gap:6px;
+    overflow-y:auto;
+  }
+  .brand{display:flex;align-items:center;gap:10px;padding:6px 10px 18px}
+  .logo{
+    width:36px;height:36px;border-radius:10px;
+    background:var(--gradient-primary);
+    display:grid;place-items:center;
+    box-shadow:var(--shadow-glow);
+    position:relative;
+  }
+  .logo::after{
+    content:"";position:absolute;inset:6px;border-radius:6px;
+    background:radial-gradient(circle at 30% 30%, #fff, rgba(255,255,255,0) 60%);
+    opacity:.6;
+  }
+  .brand-name{font-family:'Space Grotesk';font-weight:700;font-size:18px}
+  .brand-tag{font-size:11px;color:var(--muted);letter-spacing:.08em;text-transform:uppercase}
+
+  .nav-section{margin-top:8px;padding:0 8px;font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}
+  .nav-item{
+    display:flex;align-items:center;gap:12px;
+    padding:10px 12px;border-radius:10px;color:var(--muted);
+    font-size:14px;font-weight:500;transition:.2s;
+    width:100%;text-align:left;
+  }
+  .nav-item:hover{background:rgba(255,255,255,.04);color:var(--text)}
+  .nav-item.active{
+    background:var(--gradient-soft);
+    color:var(--text);
+    border:1px solid var(--border-strong);
+  }
+  .nav-item svg{width:18px;height:18px;opacity:.9}
+  .nav-badge{margin-left:auto;font-size:11px;background:rgba(108,92,255,.2);color:var(--primary-2);padding:2px 8px;border-radius:999px}
+
+  .sidebar-footer{margin-top:auto;padding:12px;border-radius:12px;background:rgba(255,255,255,.03);border:1px solid var(--border)}
+  .upgrade-title{font-weight:600;font-size:13px}
+  .upgrade-sub{font-size:12px;color:var(--muted);margin:4px 0 10px}
+  .btn-upgrade{
+    width:100%;padding:8px 12px;border-radius:8px;font-weight:600;font-size:13px;
+    background:var(--gradient-primary);color:#0b0f24;
+  }
+
+  /* Main */
+  .main{display:flex;flex-direction:column;min-width:0}
+  .topbar{
+    height:64px;display:flex;align-items:center;gap:14px;
+    padding:0 24px;border-bottom:1px solid var(--border);
+    background:rgba(7,9,18,.6);backdrop-filter:blur(12px);
+  }
+  .negotiation-meta{display:flex;align-items:center;gap:12px;min-width:0}
+  .avatar{
+    width:40px;height:40px;border-radius:50%;
+    background:linear-gradient(135deg,#22d3ee,#6c5cff);
+    display:grid;place-items:center;font-weight:700;color:#0b0f24;
+    border:2px solid rgba(255,255,255,.1);
+  }
+  .meta-text{min-width:0}
+  .meta-name{font-weight:600;font-size:14px;display:flex;align-items:center;gap:8px}
+  .status-dot{width:8px;height:8px;border-radius:50%;background:var(--success);box-shadow:0 0 12px var(--success)}
+  .meta-sub{font-size:12px;color:var(--muted)}
+  .topbar-actions{margin-left:auto;display:flex;gap:8px;align-items:center}
+  .icon-btn{
+    width:38px;height:38px;border-radius:10px;display:grid;place-items:center;
+    border:1px solid var(--border);color:var(--muted);transition:.2s;
+  }
+  .icon-btn:hover{color:var(--text);border-color:var(--border-strong);background:rgba(255,255,255,.03)}
+
+  .lead-score{
+    display:flex;align-items:center;gap:10px;padding:6px 12px;border-radius:999px;
+    border:1px solid var(--border);background:rgba(255,255,255,.02);
+  }
+  .score-ring{
+    --p:72;
+    width:32px;height:32px;border-radius:50%;
+    background:conic-gradient(var(--primary) calc(var(--p)*1%), rgba(255,255,255,.08) 0);
+    display:grid;place-items:center;
+  }
+  .score-ring::after{
+    content:"";width:24px;height:24px;border-radius:50%;background:var(--bg-2);
+  }
+  .score-ring span{position:absolute;font-size:10px;font-weight:700}
+  .score-label{font-size:12px;color:var(--muted)}
+  .score-val{font-weight:700;font-size:13px}
+
+  /* Chat area */
+  .chat{
+    flex:1;overflow-y:auto;padding:28px 32px;
+    display:flex;flex-direction:column;gap:18px;
+  }
+  .msg{display:flex;gap:12px;max-width:78%;animation:slideIn .35s ease}
+  @keyframes slideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+  .msg.client{align-self:flex-start}
+  .msg.user{align-self:flex-end;flex-direction:row-reverse}
+  .msg.ai{align-self:flex-start}
+  .msg-avatar{
+    width:34px;height:34px;border-radius:10px;flex-shrink:0;
+    display:grid;place-items:center;font-size:12px;font-weight:700;
+  }
+  .msg.client .msg-avatar{background:rgba(255,255,255,.06);color:var(--muted)}
+  .msg.user .msg-avatar{background:linear-gradient(135deg,#22d3ee,#6c5cff);color:#0b0f24}
+  .msg.ai .msg-avatar{background:var(--gradient-primary);color:#0b0f24;box-shadow:var(--shadow-glow)}
+  .msg-bubble{
+    padding:14px 16px;border-radius:14px;font-size:14.5px;line-height:1.55;
+    border:1px solid var(--border);background:var(--surface);
+  }
+  .msg.user .msg-bubble{background:linear-gradient(135deg, rgba(108,92,255,.18), rgba(34,211,238,.08));border-color:rgba(108,92,255,.3)}
+  .msg.ai .msg-bubble{
+    background:linear-gradient(180deg, rgba(108,92,255,.10), rgba(34,211,238,.04));
+    border-color:rgba(167,139,250,.25);
+  }
+  .msg-meta{font-size:11px;color:var(--muted);margin-top:6px;display:flex;gap:8px;align-items:center}
+  .tag{
+    font-size:10px;text-transform:uppercase;letter-spacing:.08em;
+    padding:2px 8px;border-radius:999px;background:rgba(255,255,255,.05);color:var(--muted);
+  }
+  .tag.ai{background:rgba(108,92,255,.15);color:var(--primary-2)}
+  .tag.warn{background:rgba(245,158,11,.15);color:var(--warning)}
+  .tag.success{background:rgba(34,197,94,.15);color:var(--success)}
+
+  .ai-suggestion{
+    margin-top:10px;padding:12px;border-radius:12px;
+    background:rgba(7,9,18,.5);border:1px dashed rgba(167,139,250,.35);
+  }
+  .ai-suggestion-title{
+    font-size:11px;text-transform:uppercase;letter-spacing:.1em;
+    color:var(--primary-2);font-weight:700;margin-bottom:6px;display:flex;gap:6px;align-items:center;
+  }
+  .ai-actions{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+  .chip{
+    font-size:12px;padding:6px 10px;border-radius:999px;
+    border:1px solid var(--border-strong);color:var(--text);
+    background:rgba(255,255,255,.03);transition:.2s;
+  }
+  .chip:hover{background:rgba(108,92,255,.15);border-color:var(--primary)}
+
+  .typing{display:flex;gap:4px;padding:6px 0}
+  .typing span{
+    width:8px;height:8px;border-radius:50%;background:var(--primary-2);
+    animation:typing 1.2s infinite;
+  }
+  .typing span:nth-child(2){animation-delay:.15s}
+  .typing span:nth-child(3){animation-delay:.3s}
+  @keyframes typing{0%,60%,100%{opacity:.3;transform:translateY(0)}30%{opacity:1;transform:translateY(-3px)}}
+
+  /* Composer */
+  .composer{
+    border-top:1px solid var(--border);
+    padding:16px 24px 20px;
+    background:rgba(7,9,18,.7);backdrop-filter:blur(10px);
+  }
+  .composer-tabs{display:flex;gap:6px;margin-bottom:10px}
+  .ctab{
+    font-size:12px;padding:6px 12px;border-radius:8px;color:var(--muted);
+    border:1px solid transparent;
+  }
+  .ctab.active{background:rgba(108,92,255,.12);color:var(--primary-2);border-color:rgba(108,92,255,.25)}
+  .composer-box{
+    border:1px solid var(--border-strong);border-radius:14px;
+    background:var(--surface);padding:10px 12px;
+    display:flex;flex-direction:column;gap:8px;
+    transition:.2s;
+  }
+  .composer-box:focus-within{border-color:var(--primary);box-shadow:0 0 0 4px rgba(108,92,255,.15)}
+  .composer textarea{
+    width:100%;background:transparent;border:none;outline:none;
+    color:var(--text);resize:none;font-size:14.5px;line-height:1.5;
+    min-height:48px;max-height:160px;
+  }
+  .composer-toolbar{display:flex;align-items:center;gap:6px}
+  .tool-btn{
+    padding:6px 10px;border-radius:8px;font-size:12px;color:var(--muted);
+    display:flex;align-items:center;gap:6px;transition:.2s;
+  }
+  .tool-btn:hover{background:rgba(255,255,255,.05);color:var(--text)}
+  .send{
+    margin-left:auto;padding:9px 16px;border-radius:10px;font-weight:600;font-size:13px;
+    background:var(--gradient-primary);color:#0b0f24;
+    display:flex;align-items:center;gap:8px;
+    box-shadow:var(--shadow-glow);
+  }
+  .send:disabled{opacity:.5;cursor:not-allowed}
+
+  /* Right panel — IA Insights */
+  .panel{
+    border-left:1px solid var(--border);
+    background:linear-gradient(180deg, rgba(255,255,255,.02), rgba(255,255,255,0));
+    overflow-y:auto;padding:22px 20px;display:flex;flex-direction:column;gap:18px;
+  }
+  .panel-title{
+    font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted);
+    display:flex;align-items:center;gap:8px;
+  }
+  .card{
+    border:1px solid var(--border);border-radius:14px;padding:14px;
+    background:rgba(255,255,255,.02);
+  }
+  .card.glow{
+    background:var(--gradient-soft);
+    border-color:rgba(108,92,255,.3);
+  }
+  .card-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+  .card-title{font-weight:600;font-size:13px}
+  .progress{height:6px;border-radius:999px;background:rgba(255,255,255,.06);overflow:hidden}
+  .progress > div{height:100%;background:var(--gradient-primary);border-radius:999px;transition:width .6s}
+  .stat-row{display:flex;justify-content:space-between;font-size:13px;padding:6px 0;color:var(--muted)}
+  .stat-row strong{color:var(--text);font-weight:600}
+
+  .emotion{display:flex;align-items:center;gap:10px}
+  .emotion-icon{
+    width:42px;height:42px;border-radius:12px;display:grid;place-items:center;
+    background:rgba(34,211,238,.12);color:var(--accent);font-size:20px;
+  }
+  .emotion-text{font-weight:600;font-size:14px}
+  .emotion-sub{font-size:12px;color:var(--muted)}
+
+  .objection{
+    padding:10px;border-radius:10px;background:rgba(245,158,11,.08);
+    border:1px solid rgba(245,158,11,.2);font-size:13px;display:flex;gap:8px;align-items:flex-start;
+  }
+
+  .strategy-list{display:flex;flex-direction:column;gap:8px}
+  .strategy-item{
+    padding:10px;border-radius:10px;border:1px solid var(--border);
+    background:rgba(255,255,255,.02);font-size:13px;
+    display:flex;gap:10px;align-items:flex-start;cursor:pointer;transition:.2s;
+  }
+  .strategy-item:hover{border-color:var(--primary);background:rgba(108,92,255,.08)}
+  .strategy-num{
+    width:22px;height:22px;border-radius:6px;background:var(--gradient-primary);
+    color:#0b0f24;font-weight:700;font-size:11px;display:grid;place-items:center;flex-shrink:0;
+  }
+
+  /* Onboarding modal */
+  .modal-bg{
+    position:fixed;inset:0;background:rgba(3,5,15,.75);backdrop-filter:blur(8px);
+    display:grid;place-items:center;z-index:50;padding:20px;
+  }
+  .modal{
+    width:100%;max-width:520px;background:var(--surface);border:1px solid var(--border-strong);
+    border-radius:20px;padding:28px;box-shadow:var(--shadow-glow);
+  }
+  .modal h2{font-size:22px;margin-bottom:6px}
+  .modal p.sub{color:var(--muted);font-size:14px;margin-bottom:20px}
+  .field{margin-bottom:14px}
+  .field label{font-size:12px;color:var(--muted);font-weight:500;margin-bottom:6px;display:block;text-transform:uppercase;letter-spacing:.06em}
+  .field input,.field textarea,.field select{
+    width:100%;background:rgba(7,9,18,.6);border:1px solid var(--border);
+    color:var(--text);padding:11px 13px;border-radius:10px;font-size:14px;outline:none;transition:.2s;
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{border-color:var(--primary);box-shadow:0 0 0 4px rgba(108,92,255,.15)}
+  .field textarea{min-height:90px;resize:vertical}
+  .modal-actions{display:flex;gap:10px;margin-top:8px}
+  .btn-primary{
+    flex:1;padding:12px;border-radius:10px;font-weight:600;font-size:14px;
+    background:var(--gradient-primary);color:#0b0f24;
+  }
+  .btn-ghost{padding:12px 18px;border-radius:10px;font-weight:500;font-size:14px;color:var(--muted)}
+  .btn-ghost:hover{color:var(--text)}
+
+  /* Page views (CRM, etc) */
+  .view{flex:1;overflow-y:auto;padding:28px 32px;display:none;flex-direction:column;gap:20px}
+  .view.active{display:flex}
+  .view-header{display:flex;align-items:center;justify-content:space-between}
+  .view-title{font-size:24px;font-weight:700}
+  .view-sub{color:var(--muted);font-size:14px;margin-top:4px}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .stat-card{padding:18px;border-radius:14px;border:1px solid var(--border);background:rgba(255,255,255,.02);position:relative;overflow:hidden}
+  .stat-card::before{content:"";position:absolute;inset:0;background:var(--gradient-soft);opacity:.5}
+  .stat-card > *{position:relative}
+  .stat-label{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .stat-value{font-size:28px;font-weight:700;font-family:'Space Grotesk';margin-top:6px}
+  .stat-trend{font-size:12px;color:var(--success);margin-top:4px}
+
+  .funnel{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+  .funnel-col{
+    border:1px solid var(--border);border-radius:14px;padding:14px;
+    background:rgba(255,255,255,.02);min-height:300px;
+  }
+  .funnel-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+  .funnel-name{font-weight:600;font-size:13px;display:flex;align-items:center;gap:8px}
+  .funnel-dot{width:8px;height:8px;border-radius:50%}
+  .lead-card{
+    padding:12px;border-radius:10px;background:var(--surface);
+    border:1px solid var(--border);margin-bottom:8px;cursor:pointer;transition:.2s;
+  }
+  .lead-card:hover{border-color:var(--primary);transform:translateY(-1px)}
+  .lead-name{font-weight:600;font-size:13px}
+  .lead-company{font-size:12px;color:var(--muted);margin-top:2px}
+  .lead-foot{display:flex;justify-content:space-between;align-items:center;margin-top:8px;font-size:11px;color:var(--muted)}
+
+  /* Responsive */
+  @media (max-width:1100px){
+    .app{grid-template-columns:64px 1fr 320px}
+    .brand-name,.brand-tag,.nav-item span:not(.nav-badge),.sidebar-footer,.nav-section{display:none}
+    .nav-item{justify-content:center;padding:12px}
+  }
+  @media (max-width:820px){
+    .app{grid-template-columns:1fr}
+    .sidebar,.panel{display:none}
+    .chat,.view{padding:18px}
+    .stats-grid{grid-template-columns:repeat(2,1fr)}
+    .funnel{grid-template-columns:1fr}
+    .msg{max-width:92%}
+  }
+</style>
+</head>
+<body>
+
+<!-- Onboarding modal -->
+<div class="modal-bg" id="onboarding">
+  <div class="modal">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:14px">
+      <div class="logo"></div>
+      <div>
+        <h2>Iniciar nova negociação</h2>
+        <p class="sub" style="margin:0">Informe o contexto e a IrisIA assume o copiloto.</p>
+      </div>
+    </div>
+    <div class="field">
+      <label>Nome do lead / cliente</label>
+      <input id="f-lead" placeholder="Ex: Marina Costa — Dental Prime" value="Marina Costa — Dental Prime"/>
+    </div>
+    <div class="field">
+      <label>Produto ou serviço</label>
+      <input id="f-product" placeholder="Ex: Plano Premium de software odontológico" value="Plano Premium de software odontológico"/>
+    </div>
+    <div class="field">
+      <label>Contexto da negociação</label>
+      <textarea id="f-context" placeholder="Descreva o estágio do lead, dores, objeções já identificadas...">Lead chegou via Instagram, demonstrou interesse no plano premium mas mencionou que o orçamento está apertado este mês. É dona de uma clínica com 4 dentistas.</textarea>
+    </div>
+    <div class="field">
+      <label>Tom de comunicação</label>
+      <select id="f-tone">
+        <option>Consultivo e humanizado</option>
+        <option>Direto e objetivo</option>
+        <option>Empático e acolhedor</option>
+        <option>Premium e exclusivo</option>
+      </select>
+    </div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="document.getElementById('onboarding').style.display='none'">Pular</button>
+      <button class="btn-primary" onclick="startNegotiation()">Iniciar com IrisIA →</button>
+    </div>
+  </div>
+</div>
+
+<div class="app">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="logo"></div>
+      <div>
+        <div class="brand-name">IrisIA</div>
+        <div class="brand-tag">Sales Copilot</div>
+      </div>
+    </div>
+
+    <div class="nav-section">Workspace</div>
+    <button class="nav-item active" data-view="chat">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12c0 4.97-4.03 9-9 9-1.5 0-2.92-.37-4.16-1.02L3 21l1.02-4.84A8.96 8.96 0 0 1 3 12c0-4.97 4.03-9 9-9s9 4.03 9 9z"/></svg>
+      <span>Negociação ativa</span>
+      <span class="nav-badge">IA</span>
+    </button>
+    <button class="nav-item" data-view="crm">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3h18v4H3zM3 10h18v4H3zM3 17h18v4H3z"/></svg>
+      <span>CRM / Funil</span>
+    </button>
+    <button class="nav-item" data-view="leads">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+      <span>Leads</span>
+      <span class="nav-badge">128</span>
+    </button>
+    <button class="nav-item" data-view="insights">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+      <span>Insights IA</span>
+    </button>
+    <button class="nav-item" data-view="scripts">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>
+      <span>Scripts de venda</span>
+    </button>
+
+    <div class="nav-section" style="margin-top:18px">Sistema</div>
+    <button class="nav-item" data-view="automations">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.36.13.69.34.95.61"/></svg>
+      <span>Automações</span>
+    </button>
+    <button class="nav-item" data-view="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1l3 6 6 .9-4.5 4.4 1 6.7L12 16l-5.5 3 1-6.7L3 7.9 9 7z"/></svg>
+      <span>Configurações</span>
+    </button>
+
+    <div class="sidebar-footer">
+      <div class="upgrade-title">⚡ IrisIA Pro</div>
+      <div class="upgrade-sub">Negociações ilimitadas + IA avançada</div>
+      <button class="btn-upgrade">Fazer upgrade</button>
+    </div>
+  </aside>
+
+  <!-- Main area -->
+  <main class="main">
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="negotiation-meta">
+        <div class="avatar" id="lead-avatar">MC</div>
+        <div class="meta-text">
+          <div class="meta-name">
+            <span id="lead-name">Marina Costa</span>
+            <span class="status-dot"></span>
+          </div>
+          <div class="meta-sub" id="lead-sub">Dental Prime · Plano Premium · Negociação ativa</div>
+        </div>
+      </div>
+      <div class="topbar-actions">
+        <div class="lead-score">
+          <div class="score-ring" id="score-ring"><span id="score-num">72</span></div>
+          <div>
+            <div class="score-label">Chance fechamento</div>
+            <div class="score-val"><span id="score-text">72%</span> · Quente</div>
+          </div>
+        </div>
+        <button class="icon-btn" title="Histórico">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>
+        </button>
+        <button class="icon-btn" title="Nova negociação" onclick="document.getElementById('onboarding').style.display='grid'">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Chat view -->
+    <section class="view active" id="view-chat" style="padding:0">
+      <div class="chat" id="chat"></div>
+
+      <div class="composer">
+        <div class="composer-tabs">
+          <button class="ctab active" data-tab="response">💬 Resposta</button>
+          <button class="ctab" data-tab="paste">📋 Colar conversa do cliente</button>
+          <button class="ctab" data-tab="note">📝 Nota interna</button>
+        </div>
+        <div class="composer-box">
+          <textarea id="composer" placeholder="Digite sua resposta ou cole a mensagem do cliente — a IrisIA vai analisar e sugerir o próximo passo ideal..."></textarea>
+          <div class="composer-toolbar">
+            <button class="tool-btn" onclick="aiSuggest()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l2.4 7.4H22l-6.2 4.5 2.4 7.4L12 17l-6.2 4.3 2.4-7.4L2 9.4h7.6z"/></svg>
+              Sugerir resposta
+            </button>
+            <button class="tool-btn" onclick="aiRephrase()">✨ Reescrever</button>
+            <button class="tool-btn" onclick="aiObjection()">🛡️ Quebra de objeção</button>
+            <button class="send" id="send-btn" onclick="sendMessage()">
+              Enviar
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CRM view -->
+    <section class="view" id="view-crm">
+      <div class="view-header">
+        <div>
+          <div class="view-title">CRM Inteligente</div>
+          <div class="view-sub">Funil atualizado em tempo real pela IrisIA</div>
+        </div>
+        <button class="btn-primary" style="flex:none;padding:10px 18px" onclick="document.getElementById('onboarding').style.display='grid'">+ Nova negociação</button>
+      </div>
+
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Leads ativos</div><div class="stat-value">128</div><div class="stat-trend">↑ 12% essa semana</div></div>
+        <div class="stat-card"><div class="stat-label">Taxa de conversão</div><div class="stat-value">34.2%</div><div class="stat-trend">↑ 8.4% com IA</div></div>
+        <div class="stat-card"><div class="stat-label">Receita prevista</div><div class="stat-value">R$ 184k</div><div class="stat-trend">↑ Próx. 30 dias</div></div>
+        <div class="stat-card"><div class="stat-label">Tempo médio fechamento</div><div class="stat-value">4.2d</div><div class="stat-trend">↓ 38% vs manual</div></div>
+      </div>
+
+      <div class="funnel" id="funnel"></div>
+    </section>
+
+    <!-- Leads view -->
+    <section class="view" id="view-leads">
+      <div class="view-header">
+        <div><div class="view-title">Leads</div><div class="view-sub">Classificação automática por temperatura</div></div>
+      </div>
+      <div id="leads-list" class="strategy-list"></div>
+    </section>
+
+    <!-- Insights view -->
+    <section class="view" id="view-insights">
+      <div class="view-header">
+        <div><div class="view-title">Insights Comerciais</div><div class="view-sub">Gerados automaticamente pela IrisIA</div></div>
+      </div>
+      <div class="card glow">
+        <div class="card-head"><div class="card-title">🎯 Recomendação prioritária</div></div>
+        <div style="font-size:14px;line-height:1.6">Foque nos 3 leads quentes que demonstraram urgência nas últimas 24h. Probabilidade combinada de fechamento: <strong>R$ 47.800</strong> em receita projetada.</div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-label">Objeção mais comum</div><div class="stat-value" style="font-size:18px">Preço</div><div class="stat-trend" style="color:var(--muted)">42% das negociações</div></div>
+        <div class="stat-card"><div class="stat-label">Melhor horário</div><div class="stat-value" style="font-size:18px">14h–17h</div><div class="stat-trend" style="color:var(--muted)">+62% resposta</div></div>
+        <div class="stat-card"><div class="stat-label">Script com + conversão</div><div class="stat-value" style="font-size:18px">Consultivo</div><div class="stat-trend" style="color:var(--muted)">38% close rate</div></div>
+        <div class="stat-card"><div class="stat-label">Lead score médio</div><div class="stat-value" style="font-size:18px">68/100</div><div class="stat-trend">↑ 11 pts</div></div>
+      </div>
+    </section>
+
+    <!-- Scripts view -->
+    <section class="view" id="view-scripts">
+      <div class="view-header"><div><div class="view-title">Scripts de Venda IA</div><div class="view-sub">Gerados sob demanda para cada estágio</div></div></div>
+      <div id="scripts-list" class="strategy-list"></div>
+    </section>
+
+    <section class="view" id="view-automations">
+      <div class="view-header"><div><div class="view-title">Automações</div><div class="view-sub">A IrisIA trabalha 24/7 por você</div></div></div>
+      <div class="card glow"><div class="card-title">🤖 Follow-up automático ativo</div><div style="margin-top:8px;font-size:14px;color:var(--muted)">Reativando 23 leads frios com mensagens personalizadas.</div></div>
+    </section>
+    <section class="view" id="view-settings">
+      <div class="view-header"><div><div class="view-title">Configurações</div><div class="view-sub">Personalize sua IrisIA</div></div></div>
+    </section>
+  </main>
+
+  <!-- Right panel — IA Insights -->
+  <aside class="panel">
+    <div>
+      <div class="panel-title">⚡ IrisIA Insights</div>
+    </div>
+
+    <div class="card glow">
+      <div class="card-head"><div class="card-title">Probabilidade de fechamento</div></div>
+      <div style="display:flex;align-items:baseline;gap:6px">
+        <div style="font-size:34px;font-weight:700;font-family:'Space Grotesk'" id="panel-score">72%</div>
+        <div style="font-size:12px;color:var(--success)">↑ 14% após última resposta</div>
+      </div>
+      <div class="progress" style="margin-top:10px"><div id="panel-bar" style="width:72%"></div></div>
+      <div style="font-size:12px;color:var(--muted);margin-top:8px">Lead classificado como <strong style="color:var(--text)">QUENTE 🔥</strong></div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">Análise emocional</div><span class="tag ai">tempo real</span></div>
+      <div class="emotion">
+        <div class="emotion-icon">😊</div>
+        <div>
+          <div class="emotion-text" id="emotion-name">Interessada · Cautelosa</div>
+          <div class="emotion-sub">Tom positivo com hesitação no preço</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">🛡️ Objeções detectadas</div></div>
+      <div class="objection">
+        <span>💰</span>
+        <div><strong>Preço / orçamento</strong><div style="color:var(--muted);margin-top:2px">"Orçamento apertado este mês"</div></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">🎯 Próximas estratégias</div></div>
+      <div class="strategy-list">
+        <div class="strategy-item" onclick="useStrategy(this)">
+          <div class="strategy-num">1</div>
+          <div><strong>Oferecer parcelamento</strong><div style="color:var(--muted);font-size:12px;margin-top:2px">Dividir em 12x sem juros remove objeção financeira</div></div>
+        </div>
+        <div class="strategy-item" onclick="useStrategy(this)">
+          <div class="strategy-num">2</div>
+          <div><strong>Ancorar valor com ROI</strong><div style="color:var(--muted);font-size:12px;margin-top:2px">Mostrar quanto a clínica vai economizar/faturar</div></div>
+        </div>
+        <div class="strategy-item" onclick="useStrategy(this)">
+          <div class="strategy-num">3</div>
+          <div><strong>Criar urgência sutil</strong><div style="color:var(--muted);font-size:12px;margin-top:2px">Bônus por decisão até sexta</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-head"><div class="card-title">📊 Pulso da negociação</div></div>
+      <div class="stat-row"><span>Mensagens trocadas</span><strong id="msg-count">0</strong></div>
+      <div class="stat-row"><span>Tempo médio resposta</span><strong>2m 14s</strong></div>
+      <div class="stat-row"><span>Engajamento</span><strong style="color:var(--success)">Alto</strong></div>
+      <div class="stat-row"><span>Estágio funil</span><strong>Negociação</strong></div>
+    </div>
+  </aside>
+</div>
+
+<script>
+  // ───────────────────────────── Data
+  const leads = [
+    {name:"Marina Costa", company:"Dental Prime", stage:"negociacao", score:72, value:"R$ 4.800", temp:"🔥"},
+    {name:"Carlos Henrique", company:"Studio CH Arquitetura", stage:"qualificacao", score:58, value:"R$ 12.400", temp:"🔥"},
+    {name:"Patrícia Lima", company:"Clínica Bem Estar", stage:"proposta", score:84, value:"R$ 6.900", temp:"🔥"},
+    {name:"Roberto Alves", company:"AlvesTech", stage:"contato", score:34, value:"R$ 3.200", temp:"❄️"},
+    {name:"Juliana Reis", company:"JR Consultoria", stage:"negociacao", score:68, value:"R$ 9.100", temp:"🔥"},
+    {name:"Felipe Moura", company:"Moura Imóveis", stage:"proposta", score:91, value:"R$ 18.000", temp:"🔥"},
+    {name:"Sofia Mendes", company:"Mendes Beauty", stage:"qualificacao", score:42, value:"R$ 2.400", temp:"🌤️"},
+    {name:"André Souza", company:"Souza Logística", stage:"contato", score:25, value:"R$ 7.500", temp:"❄️"}
+  ];
+  const stages = [
+    {id:"contato", name:"Contato", color:"#8a93c2"},
+    {id:"qualificacao", name:"Qualificação", color:"#22d3ee"},
+    {id:"proposta", name:"Proposta", color:"#a78bfa"},
+    {id:"negociacao", name:"Negociação", color:"#f59e0b"},
+  ];
+  const scripts = [
+    {title:"Abertura consultiva", desc:"Para primeiro contato com leads frios — gera curiosidade sem pressão"},
+    {title:"Quebra de objeção: preço", desc:"Reframe de valor com ancoragem e ROI"},
+    {title:"Follow-up de proposta enviada", desc:"Reativação suave após 48h sem resposta"},
+    {title:"Fechamento por urgência", desc:"Cria escassez genuína para acelerar decisão"},
+    {title:"Reativação de lead frio", desc:"Mensagem humanizada para retomar contato perdido"}
+  ];
+
+  // ───────────────────────────── Chat state
+  let chatMessages = [];
+
+  function renderChat(){
+    const c = document.getElementById('chat');
+    c.innerHTML = chatMessages.map(m=>{
+      if(m.type==='typing'){
+        return `<div class="msg ai"><div class="msg-avatar">IA</div><div class="msg-bubble"><div class="typing"><span></span><span></span><span></span></div></div></div>`;
+      }
+      const av = m.role==='client' ? (m.initials||'C') : m.role==='user' ? 'EU' : 'IA';
+      const tag = m.role==='ai' ? '<span class="tag ai">IrisIA</span>' : m.role==='client' ? '<span class="tag">Cliente</span>' : '<span class="tag success">Você</span>';
+      const sugg = m.suggestion ? `
+        <div class="ai-suggestion">
+          <div class="ai-suggestion-title">⚡ Sugestão IrisIA — ${m.suggestion.label||'Resposta ideal'}</div>
+          <div style="font-size:14px;line-height:1.55">${m.suggestion.text}</div>
+          <div class="ai-actions">
+            <button class="chip" onclick="applySuggestion(this, \`${m.suggestion.text.replace(/`/g,"\\`")}\`)">Usar essa resposta</button>
+            <button class="chip" onclick="aiRephrase()">Reescrever</button>
+            <button class="chip" onclick="aiTone()">Mudar tom</button>
+          </div>
+        </div>` : '';
+      return `<div class="msg ${m.role}">
+        <div class="msg-avatar">${av}</div>
+        <div>
+          <div class="msg-bubble">${m.text}${sugg}</div>
+          <div class="msg-meta">${tag}<span>${m.time||'agora'}</span></div>
+        </div>
+      </div>`;
+    }).join('');
+    c.scrollTop = c.scrollHeight;
+    document.getElementById('msg-count').textContent = chatMessages.filter(m=>m.type!=='typing').length;
+  }
+
+  function addMessage(m){ chatMessages.push({time:'agora',...m}); renderChat(); }
+  function removeTyping(){ chatMessages = chatMessages.filter(m=>m.type!=='typing'); renderChat(); }
+
+  // ───────────────────────────── Negotiation flow
+  function startNegotiation(){
+    document.getElementById('onboarding').style.display='none';
+    const lead = document.getElementById('f-lead').value || 'Novo Lead';
+    const product = document.getElementById('f-product').value;
+    const context = document.getElementById('f-context').value;
+    const tone = document.getElementById('f-tone').value;
+
+    const name = lead.split('—')[0].trim();
+    const initials = name.split(' ').map(n=>n[0]).slice(0,2).join('').toUpperCase();
+    document.getElementById('lead-name').textContent = name;
+    document.getElementById('lead-avatar').textContent = initials;
+    document.getElementById('lead-sub').textContent = `${lead.split('—')[1]?.trim()||''} · ${product} · Tom ${tone.toLowerCase()}`;
+
+    chatMessages = [];
+    addMessage({role:'ai', text:`Olá! Sou a <strong>IrisIA</strong> 👋 Analisei o contexto: <em>"${context}"</em><br><br>Identifiquei <strong>1 objeção principal (orçamento)</strong> e classifiquei o lead como <strong>quente</strong> 🔥. Estou pronta para sugerir as melhores respostas em tempo real. Cole a mensagem do cliente ou escreva sua próxima resposta abaixo.`});
+
+    setTimeout(()=>{
+      addMessage({role:'client', initials, text:`Oi! Adorei a apresentação do <strong>${product}</strong>, mas confesso que o investimento ficou um pouco acima do que eu tinha previsto pra esse mês. Vocês têm alguma flexibilidade?`});
+      setTimeout(generateAISuggestion, 800);
+    }, 1200);
+  }
+
+  function generateAISuggestion(){
+    addMessage({type:'typing'});
+    setTimeout(()=>{
+      removeTyping();
+      addMessage({
+        role:'ai',
+        text:'Detectei <strong>objeção de preço com abertura para negociação</strong>. A cliente está engajada — não quer um "não", quer uma alternativa. Recomendo <strong>ancorar valor + oferecer parcelamento</strong>:',
+        suggestion:{
+          label:'Reframe de valor + parcelamento',
+          text:`Marina, faz total sentido — investimento precisa caber no momento da clínica. 💡<br><br>Pensando na sua realidade: as clínicas que entram no <strong>Premium</strong> recuperam o investimento em <strong>~45 dias</strong> só com a redução de no-show e otimização da agenda. Em uma clínica com 4 dentistas como a sua, isso costuma representar <strong>+R$ 8 a 12 mil/mês</strong>.<br><br>Pra facilitar, posso liberar <strong>12x sem juros</strong> no cartão e ainda incluir o <strong>onboarding premium</strong> sem custo (R$ 1.200) se fecharmos até sexta. Faz sentido pra você?`
+        }
+      });
+      updateScore(78);
+    }, 1400);
+  }
+
+  function applySuggestion(btn, text){
+    document.getElementById('composer').value = text.replace(/<[^>]+>/g,'');
+    document.getElementById('composer').focus();
+    btn.textContent = '✓ Aplicado';
+  }
+
+  function sendMessage(){
+    const t = document.getElementById('composer').value.trim();
+    if(!t) return;
+    addMessage({role:'user', text:t});
+    document.getElementById('composer').value='';
+    setTimeout(()=>{
+      addMessage({type:'typing'});
+      setTimeout(()=>{
+        removeTyping();
+        const responses = [
+          {client:'Hmm, parcelado fica bem mais viável! E esse onboarding incluído faz diferença pra implantação rápida né?', score:84},
+          {client:'Gostei da proposta. Posso fechar amanhã depois de alinhar com meu sócio?', score:88},
+          {client:'Faz sentido o que você disse sobre o ROI. Me manda os próximos passos pra eu avaliar?', score:81}
+        ];
+        const r = responses[Math.floor(Math.random()*responses.length)];
+        addMessage({role:'client', initials:document.getElementById('lead-avatar').textContent, text:r.client});
+        updateScore(r.score);
+        setTimeout(generateFollowUp, 900);
+      }, 1200);
+    }, 400);
+  }
+
+  function generateFollowUp(){
+    addMessage({type:'typing'});
+    setTimeout(()=>{
+      removeTyping();
+      addMessage({
+        role:'ai',
+        text:'🎯 Sinal de compra detectado! Cliente está pronta para avançar. Recomendo <strong>movimento de fechamento</strong> com próximos passos claros:',
+        suggestion:{
+          label:'Fechamento + CTA claro',
+          text:`Perfeito, Marina! 🎉 Vou já preparar tudo pra você:<br><br>1️⃣ Envio o contrato digital ainda hoje<br>2️⃣ Agendamos o kickoff do onboarding pra próxima terça<br>3️⃣ Sua equipe já começa a usar na semana seguinte<br><br>Posso reservar o slot da terça às <strong>14h</strong>? Assim garantimos a condição especial e o time já fica energizado pra começar.`
+        }
+      });
+    }, 1400);
+  }
+
+  function aiSuggest(){ generateAISuggestion(); }
+  function aiRephrase(){
+    const c = document.getElementById('composer');
+    if(!c.value){ c.value = 'Marina, entendo seu ponto. Vamos encontrar o melhor caminho juntos — proposta com 12x sem juros e bônus de onboarding incluso. Topa avaliar?'; return; }
+    c.value = '✨ ' + c.value + ' — Posso te ajudar a destravar isso ainda hoje?';
+  }
+  function aiObjection(){
+    document.getElementById('composer').value = 'Entendo sua preocupação com o investimento. Posso te mostrar exatamente como outras clínicas no seu porte recuperaram esse valor em menos de 60 dias?';
+  }
+  function aiTone(){
+    document.getElementById('emotion-name').textContent = 'Receptiva · Confiante';
+  }
+  function useStrategy(el){
+    const title = el.querySelector('strong').textContent;
+    document.getElementById('composer').value = `[Estratégia: ${title}] — `;
+    document.getElementById('composer').focus();
+  }
+
+  function updateScore(v){
+    document.getElementById('score-num').textContent = v;
+    document.getElementById('score-text').textContent = v+'%';
+    document.getElementById('panel-score').textContent = v+'%';
+    document.getElementById('panel-bar').style.width = v+'%';
+    document.getElementById('score-ring').style.setProperty('--p', v);
+  }
+
+  // ───────────────────────────── Views nav
+  document.querySelectorAll('.nav-item').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      const v = btn.dataset.view;
+      document.querySelectorAll('.view').forEach(s=>s.classList.remove('active'));
+      const target = document.getElementById('view-'+v);
+      if(target) target.classList.add('active');
+    });
+  });
+
+  // Composer tabs
+  document.querySelectorAll('.ctab').forEach(t=>{
+    t.addEventListener('click',()=>{
+      document.querySelectorAll('.ctab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      const ph = {
+        response:'Digite sua resposta — a IrisIA vai analisar e sugerir o próximo passo ideal...',
+        paste:'Cole aqui a mensagem do cliente para que a IrisIA interprete e gere a melhor resposta...',
+        note:'Anote informações internas sobre essa negociação (não enviado ao cliente)...'
+      };
+      document.getElementById('composer').placeholder = ph[t.dataset.tab];
+    });
+  });
+
+  // Enter to send
+  document.getElementById('composer').addEventListener('keydown',e=>{
+    if(e.key==='Enter' && !e.shiftKey){ e.preventDefault(); sendMessage(); }
+  });
+
+  // ───────────────────────────── CRM funnel
+  function renderFunnel(){
+    const f = document.getElementById('funnel');
+    f.innerHTML = stages.map(s=>{
+      const items = leads.filter(l=>l.stage===s.id);
+      return `<div class="funnel-col">
+        <div class="funnel-head">
+          <div class="funnel-name"><span class="funnel-dot" style="background:${s.color}"></span>${s.name}</div>
+          <span class="tag">${items.length}</span>
+        </div>
+        ${items.map(l=>`
+          <div class="lead-card">
+            <div class="lead-name">${l.temp} ${l.name}</div>
+            <div class="lead-company">${l.company}</div>
+            <div class="lead-foot"><span>${l.value}</span><span>Score ${l.score}</span></div>
+          </div>`).join('')}
+      </div>`;
+    }).join('');
+  }
+  function renderLeads(){
+    document.getElementById('leads-list').innerHTML = leads.map(l=>`
+      <div class="strategy-item">
+        <div class="strategy-num">${l.temp}</div>
+        <div style="flex:1">
+          <strong>${l.name}</strong> · <span style="color:var(--muted)">${l.company}</span>
+          <div style="color:var(--muted);font-size:12px;margin-top:2px">Score ${l.score} · ${l.value} · Estágio: ${stages.find(s=>s.id===l.stage).name}</div>
+        </div>
+      </div>`).join('');
+  }
+  function renderScripts(){
+    document.getElementById('scripts-list').innerHTML = scripts.map((s,i)=>`
+      <div class="strategy-item">
+        <div class="strategy-num">${i+1}</div>
+        <div><strong>${s.title}</strong><div style="color:var(--muted);font-size:12px;margin-top:2px">${s.desc}</div></div>
+      </div>`).join('');
+  }
+
+  renderFunnel();
+  renderLeads();
+  renderScripts();
+  renderChat();
+</script>
+</body>
+</html>
