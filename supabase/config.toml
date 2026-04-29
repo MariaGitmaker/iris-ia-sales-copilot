@@ -1,1 +1,4 @@
 project_id = "sqqyygpvyoeituxfnugw"
+
+[functions.irisia-ai]
+verify_jwt = true
