@@ -44,6 +44,36 @@ export type Database = {
         }
         Relationships: []
       }
+      insights: {
+        Row: {
+          category: string
+          created_at: string
+          description: string
+          id: string
+          priority: string
+          title: string
+          user_id: string
+        }
+        Insert: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          title?: string
+          user_id: string
+        }
+        Update: {
+          category?: string
+          created_at?: string
+          description?: string
+          id?: string
+          priority?: string
+          title?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           avatar: string | null
@@ -146,7 +176,9 @@ export type Database = {
           last_activity: string | null
           lead_id: string | null
           lead_score: number | null
+          loss_reason: string | null
           objections: Json | null
+          objective: string | null
           product: string | null
           sentiment: string | null
           stage: string | null
@@ -164,7 +196,9 @@ export type Database = {
           last_activity?: string | null
           lead_id?: string | null
           lead_score?: number | null
+          loss_reason?: string | null
           objections?: Json | null
+          objective?: string | null
           product?: string | null
           sentiment?: string | null
           stage?: string | null
@@ -182,7 +216,9 @@ export type Database = {
           last_activity?: string | null
           lead_id?: string | null
           lead_score?: number | null
+          loss_reason?: string | null
           objections?: Json | null
+          objective?: string | null
           product?: string | null
           sentiment?: string | null
           stage?: string | null
@@ -257,6 +293,80 @@ export type Database = {
           title?: string
           tone?: string | null
           updated_at?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
+      training_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          role: string
+          session_id: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          role?: string
+          session_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "training_messages_session_id_fkey"
+            columns: ["session_id"]
+            isOneToOne: false
+            referencedRelation: "training_sessions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      training_sessions: {
+        Row: {
+          client_profile: string
+          created_at: string
+          difficulty: string
+          feedback: Json | null
+          id: string
+          product: string | null
+          scenario: string
+          score: number | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          client_profile?: string
+          created_at?: string
+          difficulty?: string
+          feedback?: Json | null
+          id?: string
+          product?: string | null
+          scenario?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          client_profile?: string
+          created_at?: string
+          difficulty?: string
+          feedback?: Json | null
+          id?: string
+          product?: string | null
+          scenario?: string
+          score?: number | null
+          status?: string
+          updated_at?: string
           user_id?: string
         }
         Relationships: []
