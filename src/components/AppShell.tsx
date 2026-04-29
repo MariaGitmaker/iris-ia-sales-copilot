@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Sparkles, MessageSquare, Users, FileText, Settings, LayoutDashboard, LogOut } from "lucide-react";
+import { Sparkles, MessageSquare, Users, FileText, Settings, LayoutDashboard, LogOut, GraduationCap } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -10,15 +10,17 @@ import { Copilot } from "@/components/views/Copilot";
 import { CRM } from "@/components/views/CRM";
 import { Scripts } from "@/components/views/Scripts";
 import { SettingsView } from "@/components/views/SettingsView";
+import { Training } from "@/components/views/Training";
 
-type View = "dashboard" | "copilot" | "crm" | "scripts" | "settings";
+type View = "dashboard" | "copilot" | "crm" | "scripts" | "training" | "settings";
 
 const NAV: { id: View; label: string; icon: any }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { id: "copilot", label: "Copiloto IA", icon: MessageSquare },
-  { id: "crm", label: "CRM Leads", icon: Users },
+  { id: "copilot", label: "Copiloto", icon: MessageSquare },
+  { id: "crm", label: "CRM", icon: Users },
+  { id: "training", label: "Treinar", icon: GraduationCap },
   { id: "scripts", label: "Scripts", icon: FileText },
-  { id: "settings", label: "Configurações", icon: Settings },
+  { id: "settings", label: "Config", icon: Settings },
 ];
 
 export default function AppShell() {
@@ -33,6 +35,7 @@ export default function AppShell() {
       case "copilot": return <Copilot />;
       case "crm": return <CRM />;
       case "scripts": return <Scripts />;
+      case "training": return <Training />;
       case "settings": return <SettingsView />;
     }
   };
@@ -121,7 +124,7 @@ export default function AppShell() {
 
         {/* Mobile bottom nav */}
         {isMobile && (
-          <nav className="glass-strong border-t border-border grid grid-cols-5 safe-bottom">
+          <nav className="glass-strong border-t border-border grid grid-cols-6 safe-bottom">
             {NAV.map((n) => {
               const Icon = n.icon;
               const active = view === n.id;
