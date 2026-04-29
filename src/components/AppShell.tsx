@@ -124,7 +124,7 @@ export default function AppShell() {
 
         {/* Mobile bottom nav */}
         {isMobile && (
-          <nav className="glass-strong border-t border-border grid grid-cols-5 safe-bottom">
+          <nav className="glass-strong border-t border-border grid grid-cols-6 safe-bottom">
             {NAV.map((n) => {
               const Icon = n.icon;
               const active = view === n.id;
