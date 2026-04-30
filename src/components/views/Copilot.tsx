@@ -291,7 +291,7 @@ export function Copilot() {
             <div key={i} className={cn("flex gap-2 max-w-[85%] md:max-w-[70%] animate-fade-in", m.role === "seller" ? "ml-auto flex-row-reverse" : "")}>
               <div className={cn("w-7 h-7 rounded-full grid place-items-center text-[10px] font-bold shrink-0",
                 m.role === "client" ? "bg-secondary" : m.role === "seller" ? "gradient-bg text-white" : "bg-accent text-accent-foreground")}>
-                {m.role === "client" ? "C" : m.role === "seller" ? "V" : "AI"}
+                {m.role === "client" ? "Clie" : m.role === "seller" ? "Vend" : "AI"}
               </div>
               <div className={cn("rounded-2xl px-3 py-2 text-sm whitespace-pre-wrap",
                 m.role === "seller" ? "gradient-bg text-white" : "glass")}>
