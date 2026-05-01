@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Sparkles, MessageSquare, Users, FileText, Settings, LayoutDashboard, LogOut, GraduationCap } from "lucide-react";
+import { Sparkles, MessageSquare, Users, FileText, Settings, LayoutDashboard, LogOut, GraduationCap, Radio } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Sheet, SheetContent } from "@/components/ui/sheet";
@@ -11,12 +11,14 @@ import { CRM } from "@/components/views/CRM";
 import { Scripts } from "@/components/views/Scripts";
 import { SettingsView } from "@/components/views/SettingsView";
 import { Training } from "@/components/views/Training";
+import { Channels } from "@/components/views/Channels";
 
-type View = "dashboard" | "copilot" | "crm" | "scripts" | "training" | "settings";
+type View = "dashboard" | "copilot" | "channels" | "crm" | "scripts" | "training" | "settings";
 
 const NAV: { id: View; label: string; icon: any }[] = [
   { id: "dashboard", label: "Dashboard", icon: LayoutDashboard },
   { id: "copilot", label: "Copiloto", icon: MessageSquare },
+  { id: "channels", label: "Canais", icon: Radio },
   { id: "crm", label: "CRM", icon: Users },
   { id: "training", label: "Treinar", icon: GraduationCap },
   { id: "scripts", label: "Scripts", icon: FileText },
@@ -33,6 +35,7 @@ export default function AppShell() {
     switch (view) {
       case "dashboard": return <Dashboard />;
       case "copilot": return <Copilot />;
+      case "channels": return <Channels />;
       case "crm": return <CRM />;
       case "scripts": return <Scripts />;
       case "training": return <Training />;
@@ -124,7 +127,7 @@ export default function AppShell() {
 
         {/* Mobile bottom nav */}
         {isMobile && (
-          <nav className="glass-strong border-t border-border grid grid-cols-6 safe-bottom">
+          <nav className="glass-strong border-t border-border grid grid-cols-7 safe-bottom">
             {NAV.map((n) => {
               const Icon = n.icon;
               const active = view === n.id;
