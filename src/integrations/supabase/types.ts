@@ -44,6 +44,271 @@ export type Database = {
         }
         Relationships: []
       }
+      bot_knowledge: {
+        Row: {
+          active: boolean
+          answer: string
+          created_at: string
+          id: string
+          kind: string
+          question: string
+          rating: number
+          source: string
+          tags: string[]
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          active?: boolean
+          answer?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          question?: string
+          rating?: number
+          source?: string
+          tags?: string[]
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          active?: boolean
+          answer?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          question?: string
+          rating?: number
+          source?: string
+          tags?: string[]
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      bot_settings: {
+        Row: {
+          aggressiveness: number
+          audience: string
+          auto_crm: boolean
+          business_hours: Json
+          created_at: string
+          enabled: boolean
+          fallback_message: string
+          greeting: string
+          handoff_keywords: string[]
+          id: string
+          methodology: string
+          objective: string
+          product: string
+          rules: string
+          tone: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          aggressiveness?: number
+          audience?: string
+          auto_crm?: boolean
+          business_hours?: Json
+          created_at?: string
+          enabled?: boolean
+          fallback_message?: string
+          greeting?: string
+          handoff_keywords?: string[]
+          id?: string
+          methodology?: string
+          objective?: string
+          product?: string
+          rules?: string
+          tone?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          aggressiveness?: number
+          audience?: string
+          auto_crm?: boolean
+          business_hours?: Json
+          created_at?: string
+          enabled?: boolean
+          fallback_message?: string
+          greeting?: string
+          handoff_keywords?: string[]
+          id?: string
+          methodology?: string
+          objective?: string
+          product?: string
+          rules?: string
+          tone?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      channel_messages: {
+        Row: {
+          content: string
+          conversation_id: string
+          created_at: string
+          direction: string
+          external_message_id: string | null
+          feedback: string | null
+          id: string
+          media_type: string | null
+          media_url: string | null
+          metadata: Json
+          sender: string
+          status: string
+        }
+        Insert: {
+          content?: string
+          conversation_id: string
+          created_at?: string
+          direction: string
+          external_message_id?: string | null
+          feedback?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json
+          sender?: string
+          status?: string
+        }
+        Update: {
+          content?: string
+          conversation_id?: string
+          created_at?: string
+          direction?: string
+          external_message_id?: string | null
+          feedback?: string | null
+          id?: string
+          media_type?: string | null
+          media_url?: string | null
+          metadata?: Json
+          sender?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "channel_messages_conversation_id_fkey"
+            columns: ["conversation_id"]
+            isOneToOne: false
+            referencedRelation: "conversations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      channels: {
+        Row: {
+          access_token: string | null
+          access_token_secret_name: string | null
+          business_account_id: string | null
+          config: Json
+          created_at: string
+          display_phone: string | null
+          id: string
+          name: string
+          phone_number_id: string | null
+          status: string
+          type: string
+          updated_at: string
+          user_id: string
+          webhook_verify_token: string
+        }
+        Insert: {
+          access_token?: string | null
+          access_token_secret_name?: string | null
+          business_account_id?: string | null
+          config?: Json
+          created_at?: string
+          display_phone?: string | null
+          id?: string
+          name?: string
+          phone_number_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id: string
+          webhook_verify_token?: string
+        }
+        Update: {
+          access_token?: string | null
+          access_token_secret_name?: string | null
+          business_account_id?: string | null
+          config?: Json
+          created_at?: string
+          display_phone?: string | null
+          id?: string
+          name?: string
+          phone_number_id?: string | null
+          status?: string
+          type?: string
+          updated_at?: string
+          user_id?: string
+          webhook_verify_token?: string
+        }
+        Relationships: []
+      }
+      conversations: {
+        Row: {
+          bot_active: boolean
+          channel_id: string
+          contact_name: string
+          contact_phone: string
+          created_at: string
+          external_contact_id: string
+          id: string
+          last_message_at: string
+          lead_id: string | null
+          negotiation_id: string | null
+          status: string
+          unread_count: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          bot_active?: boolean
+          channel_id: string
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          external_contact_id: string
+          id?: string
+          last_message_at?: string
+          lead_id?: string | null
+          negotiation_id?: string | null
+          status?: string
+          unread_count?: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          bot_active?: boolean
+          channel_id?: string
+          contact_name?: string
+          contact_phone?: string
+          created_at?: string
+          external_contact_id?: string
+          id?: string
+          last_message_at?: string
+          lead_id?: string | null
+          negotiation_id?: string | null
+          status?: string
+          unread_count?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "conversations_channel_id_fkey"
+            columns: ["channel_id"]
+            isOneToOne: false
+            referencedRelation: "channels"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       insights: {
         Row: {
           category: string
