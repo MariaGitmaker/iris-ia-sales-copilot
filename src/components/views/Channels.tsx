@@ -356,11 +356,16 @@ function Conversations() {
   }
   useEffect(() => {
     load();
-    const ch = supabase
-      .channel("conv-list")
-      .on("postgres_changes", { event: "*", schema: "public", table: "conversations" }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    let ch: any;
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id;
+      if (!uid) return;
+      ch = supabase
+        .channel(`user:${uid}:conv-list`, { config: { private: true } })
+        .on("postgres_changes", { event: "*", schema: "public", table: "conversations", filter: `user_id=eq.${uid}` }, () => load())
+        .subscribe();
+    });
+    return () => { if (ch) supabase.removeChannel(ch); };
   }, []);
 
   return (
