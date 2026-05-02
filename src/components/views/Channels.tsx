@@ -414,11 +414,16 @@ function ConversationView({ conv, onChange }: { conv: any; onChange: () => void 
   }
   useEffect(() => {
     load();
-    const ch = supabase
-      .channel(`conv-${conv.id}`)
-      .on("postgres_changes", { event: "INSERT", schema: "public", table: "channel_messages", filter: `conversation_id=eq.${conv.id}` }, () => load())
-      .subscribe();
-    return () => { supabase.removeChannel(ch); };
+    let ch: any;
+    supabase.auth.getUser().then(({ data }) => {
+      const uid = data.user?.id;
+      if (!uid) return;
+      ch = supabase
+        .channel(`user:${uid}:conv-${conv.id}`, { config: { private: true } })
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "channel_messages", filter: `conversation_id=eq.${conv.id}` }, () => load())
+        .subscribe();
+    });
+    return () => { if (ch) supabase.removeChannel(ch); };
   }, [conv.id]);
 
   async function toggleBot() {
