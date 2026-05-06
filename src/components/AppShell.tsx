@@ -101,6 +101,7 @@ export default function AppShell() {
               <div className="text-[10px] text-muted-foreground uppercase tracking-widest">{NAV.find((n) => n.id === view)?.label}</div>
             </div>
           </button>
+          <RemindersCenter />
         </header>
       )}
 
