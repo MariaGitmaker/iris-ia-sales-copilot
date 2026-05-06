@@ -8,3 +8,12 @@ verify_jwt = false
 
 [functions.whatsapp-send]
 verify_jwt = true
+
+[functions.irisia-recovery-suggest]
+verify_jwt = true
+
+[functions.detect-stale-leads]
+verify_jwt = false
+
+[functions.generate-seasonal-reminders]
+verify_jwt = false

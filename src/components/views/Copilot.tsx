@@ -67,17 +67,31 @@ export function Copilot() {
 
   const createNegotiation = async () => {
     if (!user || !newNeg.client_name) return toast.error("Informe o nome do cliente");
+    // Auto-criar lead vinculado no CRM (combinado com salvar manual)
+    let leadId: string | null = null;
+    const { data: lead } = await supabase.from("leads").insert({
+      user_id: user.id,
+      name: newNeg.client_name,
+      company: newNeg.company,
+      product: newNeg.product,
+      value: Number(newNeg.value) || 0,
+      stage: "qualification",
+      score: 50,
+      source: "copilot",
+    }).select().single();
+    if (lead) leadId = lead.id;
+
     const { data, error } = await supabase.from("negotiations").insert({
       user_id: user.id, client_name: newNeg.client_name, company: newNeg.company,
       product: newNeg.product, value: Number(newNeg.value) || 0, stage: "qualification",
-      objective: newNeg.objective,
+      objective: newNeg.objective, lead_id: leadId,
     }).select().single();
     if (error) return toast.error(error.message);
     setNegotiations((p) => [data, ...p]);
     setActiveId(data.id);
     setCreating(false);
     setNewNeg({ client_name: "", company: "", product: "", value: "", objective: "" });
-    toast.success("Negociação criada");
+    toast.success("Negociação criada e lead salvo no CRM");
   };
 
   const updateObjective = async (objective: string) => {
