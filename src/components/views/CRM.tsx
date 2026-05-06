@@ -40,6 +40,15 @@ export function CRM() {
   const load = async () => {
     if (!user) return;
     setLoading(true);
+    // Seed default reminder rules once per user
+    const { data: existing } = await supabase.from("reminder_rules").select("id").eq("user_id", user.id).limit(1);
+    if (!existing || existing.length === 0) {
+      await supabase.from("reminder_rules").insert([
+        { user_id: user.id, name: "Inatividade 24h", trigger_type: "inactivity", threshold_hours: 24, stages: ["new", "qualification"] },
+        { user_id: user.id, name: "Inatividade 48h", trigger_type: "inactivity", threshold_hours: 48, stages: ["proposal", "negotiation"] },
+        { user_id: user.id, name: "Inatividade 7 dias", trigger_type: "inactivity", threshold_hours: 168, stages: [] },
+      ]);
+    }
     const { data } = await supabase.from("leads").select("*").eq("user_id", user.id).is("deleted_at", null).order("created_at", { ascending: false });
     setLeads(data ?? []);
     setLoading(false);
