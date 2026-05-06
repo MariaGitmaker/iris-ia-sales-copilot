@@ -146,18 +146,54 @@ export type Database = {
         }
         Relationships: []
       }
+      channel_message_audit: {
+        Row: {
+          action: string
+          conversation_id: string
+          created_at: string
+          id: string
+          message_id: string
+          new_content: string | null
+          previous_content: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          conversation_id: string
+          created_at?: string
+          id?: string
+          message_id: string
+          new_content?: string | null
+          previous_content?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          conversation_id?: string
+          created_at?: string
+          id?: string
+          message_id?: string
+          new_content?: string | null
+          previous_content?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       channel_messages: {
         Row: {
           content: string
           conversation_id: string
           created_at: string
+          deleted_at: string | null
           direction: string
+          edited_at: string | null
           external_message_id: string | null
           feedback: string | null
           id: string
           media_type: string | null
           media_url: string | null
           metadata: Json
+          original_content: string | null
           sender: string
           status: string
         }
@@ -165,13 +201,16 @@ export type Database = {
           content?: string
           conversation_id: string
           created_at?: string
+          deleted_at?: string | null
           direction: string
+          edited_at?: string | null
           external_message_id?: string | null
           feedback?: string | null
           id?: string
           media_type?: string | null
           media_url?: string | null
           metadata?: Json
+          original_content?: string | null
           sender?: string
           status?: string
         }
@@ -179,13 +218,16 @@ export type Database = {
           content?: string
           conversation_id?: string
           created_at?: string
+          deleted_at?: string | null
           direction?: string
+          edited_at?: string | null
           external_message_id?: string | null
           feedback?: string | null
           id?: string
           media_type?: string | null
           media_url?: string | null
           metadata?: Json
+          original_content?: string | null
           sender?: string
           status?: string
         }
@@ -309,6 +351,42 @@ export type Database = {
           },
         ]
       }
+      holiday_templates: {
+        Row: {
+          created_at: string
+          date_rule: string
+          enabled: boolean
+          holiday_key: string
+          id: string
+          message_template: string
+          name: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          date_rule?: string
+          enabled?: boolean
+          holiday_key: string
+          id?: string
+          message_template?: string
+          name?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          date_rule?: string
+          enabled?: boolean
+          holiday_key?: string
+          id?: string
+          message_template?: string
+          name?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       insights: {
         Row: {
           category: string
@@ -339,11 +417,86 @@ export type Database = {
         }
         Relationships: []
       }
+      lead_events: {
+        Row: {
+          description: string
+          id: string
+          lead_id: string
+          metadata: Json
+          occurred_at: string
+          title: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          description?: string
+          id?: string
+          lead_id: string
+          metadata?: Json
+          occurred_at?: string
+          title?: string
+          type?: string
+          user_id: string
+        }
+        Update: {
+          description?: string
+          id?: string
+          lead_id?: string
+          metadata?: Json
+          occurred_at?: string
+          title?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      lead_reminders: {
+        Row: {
+          created_at: string
+          due_at: string
+          id: string
+          kind: string
+          lead_id: string | null
+          message: string
+          meta: Json
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          due_at?: string
+          id?: string
+          kind?: string
+          lead_id?: string | null
+          message?: string
+          meta?: Json
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          due_at?: string
+          id?: string
+          kind?: string
+          lead_id?: string | null
+          message?: string
+          meta?: Json
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       leads: {
         Row: {
           avatar: string | null
+          birthday: string | null
           company: string
           created_at: string | null
+          deleted_at: string | null
+          deleted_reason: string | null
           email: string | null
           id: string
           last_contact: string | null
@@ -359,8 +512,11 @@ export type Database = {
         }
         Insert: {
           avatar?: string | null
+          birthday?: string | null
           company?: string
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_reason?: string | null
           email?: string | null
           id?: string
           last_contact?: string | null
@@ -376,8 +532,11 @@ export type Database = {
         }
         Update: {
           avatar?: string | null
+          birthday?: string | null
           company?: string
           created_at?: string | null
+          deleted_at?: string | null
+          deleted_reason?: string | null
           email?: string | null
           id?: string
           last_contact?: string | null
@@ -517,6 +676,45 @@ export type Database = {
           created_at?: string | null
           full_name?: string | null
           id?: string
+        }
+        Relationships: []
+      }
+      reminder_rules: {
+        Row: {
+          created_at: string
+          enabled: boolean
+          id: string
+          meta: Json
+          name: string
+          stages: string[]
+          threshold_hours: number
+          trigger_type: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          meta?: Json
+          name?: string
+          stages?: string[]
+          threshold_hours?: number
+          trigger_type?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          meta?: Json
+          name?: string
+          stages?: string[]
+          threshold_hours?: number
+          trigger_type?: string
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }
