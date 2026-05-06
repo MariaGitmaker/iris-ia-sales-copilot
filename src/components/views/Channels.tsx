@@ -403,6 +403,11 @@ function ConversationView({ conv, onChange }: { conv: any; onChange: () => void 
   const [messages, setMessages] = useState<any[]>([]);
   const [text, setText] = useState("");
   const [sending, setSending] = useState(false);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editText, setEditText] = useState("");
+  const [confirmDel, setConfirmDel] = useState<string | null>(null);
+  const [historyFor, setHistoryFor] = useState<any | null>(null);
+  const [historyItems, setHistoryItems] = useState<any[]>([]);
   const endRef = useRef<HTMLDivElement>(null);
 
   async function load() {
@@ -422,7 +427,7 @@ function ConversationView({ conv, onChange }: { conv: any; onChange: () => void 
       if (!uid) return;
       ch = supabase
         .channel(`user:${uid}:conv-${conv.id}`, { config: { private: true } })
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "channel_messages", filter: `conversation_id=eq.${conv.id}` }, () => load())
+        .on("postgres_changes", { event: "*", schema: "public", table: "channel_messages", filter: `conversation_id=eq.${conv.id}` }, () => load())
         .subscribe();
     });
     return () => { if (ch) supabase.removeChannel(ch); };
@@ -444,10 +449,43 @@ function ConversationView({ conv, onChange }: { conv: any; onChange: () => void 
     else { setText(""); load(); }
   }
 
+  function startEdit(m: any) {
+    setEditingId(m.id);
+    setEditText(m.content);
+  }
+
+  async function saveEdit() {
+    if (!editingId || !editText.trim()) return;
+    const { error } = await supabase.from("channel_messages")
+      .update({ content: editText.trim() })
+      .eq("id", editingId);
+    if (error) toast({ title: "Erro", description: error.message });
+    else toast({ title: "Mensagem editada" });
+    setEditingId(null);
+    setEditText("");
+    load();
+  }
+
+  async function doDelete(id: string) {
+    const { error } = await supabase.from("channel_messages")
+      .update({ deleted_at: new Date().toISOString() })
+      .eq("id", id);
+    if (error) toast({ title: "Erro", description: error.message });
+    else toast({ title: "Mensagem excluída" });
+    setConfirmDel(null);
+    load();
+  }
+
+  async function openHistory(m: any) {
+    setHistoryFor(m);
+    const { data } = await supabase.from("channel_message_audit")
+      .select("*").eq("message_id", m.id).order("created_at", { ascending: false });
+    setHistoryItems(data || []);
+  }
+
   async function rate(mid: string, value: "up" | "down") {
     await supabase.from("channel_messages").update({ feedback: value }).eq("id", mid);
     if (value === "up") {
-      // Promove para base de conhecimento como exemplo aprovado
       const idx = messages.findIndex((m) => m.id === mid);
       const botMsg = messages[idx];
       const prev = [...messages].slice(0, idx).reverse().find((m) => m.sender === "client");
@@ -483,16 +521,40 @@ function ConversationView({ conv, onChange }: { conv: any; onChange: () => void 
       <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-secondary/20">
         {messages.map((m) => {
           const mine = m.direction === "outbound";
+          const deleted = !!m.deleted_at;
+          const editing = editingId === m.id;
           return (
-            <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"}`}>
-              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${mine ? "bg-primary text-primary-foreground" : "bg-card border border-border"}`}>
-                <div className="whitespace-pre-wrap break-words">{m.content}</div>
-                <div className="text-[10px] opacity-70 mt-1 flex items-center gap-2">
+            <div key={m.id} className={`flex ${mine ? "justify-end" : "justify-start"} group`}>
+              <div className={`max-w-[80%] rounded-2xl px-3 py-2 text-sm ${mine ? "bg-primary text-primary-foreground" : "bg-card border border-border"} ${deleted ? "opacity-60 italic" : ""}`}>
+                {editing ? (
+                  <div className="space-y-2">
+                    <Textarea rows={2} value={editText} onChange={(e) => setEditText(e.target.value)} className="text-foreground" />
+                    <div className="flex gap-1 justify-end">
+                      <Button size="icon" variant="ghost" onClick={() => setEditingId(null)}><X size={14} /></Button>
+                      <Button size="icon" variant="ghost" onClick={saveEdit}><Check size={14} /></Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="whitespace-pre-wrap break-words">
+                    {deleted ? "Mensagem excluída" : m.content}
+                  </div>
+                )}
+                <div className="text-[10px] opacity-70 mt-1 flex items-center gap-2 flex-wrap">
                   {m.sender} · {new Date(m.created_at).toLocaleTimeString()}
-                  {mine && m.sender === "bot" && (
-                    <span className="flex items-center gap-1 ml-2">
+                  {m.edited_at && !deleted && (
+                    <button onClick={() => openHistory(m)} className="underline">(editado)</button>
+                  )}
+                  {mine && m.sender === "bot" && !deleted && (
+                    <span className="flex items-center gap-1 ml-1">
                       <button onClick={() => rate(m.id, "up")} className={m.feedback === "up" ? "text-emerald-400" : ""}><ThumbsUp size={12} /></button>
                       <button onClick={() => rate(m.id, "down")} className={m.feedback === "down" ? "text-rose-400" : ""}><ThumbsDown size={12} /></button>
+                    </span>
+                  )}
+                  {mine && !deleted && !editing && (
+                    <span className="flex items-center gap-1 ml-auto opacity-0 group-hover:opacity-100 transition">
+                      <button onClick={() => startEdit(m)} title="Editar"><Pencil size={12} /></button>
+                      <button onClick={() => setConfirmDel(m.id)} title="Excluir"><Trash2 size={12} /></button>
+                      {m.edited_at && <button onClick={() => openHistory(m)} title="Histórico"><History size={12} /></button>}
                     </span>
                   )}
                 </div>
@@ -512,6 +574,41 @@ function ConversationView({ conv, onChange }: { conv: any; onChange: () => void 
         />
         <Button onClick={send} disabled={conv.bot_active || sending || !text.trim()}><Send size={16} /></Button>
       </div>
+
+      <AlertDialog open={!!confirmDel} onOpenChange={(o) => !o && setConfirmDel(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir mensagem?</AlertDialogTitle>
+            <AlertDialogDescription>
+              A mensagem ficará marcada como excluída. O conteúdo original é preservado no histórico de auditoria.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={() => confirmDel && doDelete(confirmDel)}>Excluir</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <Dialog open={!!historyFor} onOpenChange={(o) => !o && setHistoryFor(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader><DialogTitle>Histórico da mensagem</DialogTitle></DialogHeader>
+          <div className="space-y-2 max-h-[60vh] overflow-y-auto">
+            {historyItems.length === 0 && <div className="text-xs text-muted-foreground">Sem histórico.</div>}
+            {historyItems.map((h) => (
+              <div key={h.id} className="text-xs border border-border rounded p-2 space-y-1">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>{h.action === "edit" ? "Edição" : "Exclusão"}</span>
+                  <span>{new Date(h.created_at).toLocaleString()}</span>
+                </div>
+                {h.previous_content && <div><span className="text-muted-foreground">Antes:</span> {h.previous_content}</div>}
+                {h.new_content && <div><span className="text-muted-foreground">Depois:</span> {h.new_content}</div>}
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
     </>
   );
 }
+
