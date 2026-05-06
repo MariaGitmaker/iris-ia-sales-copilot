@@ -79,7 +79,10 @@ export default function AppShell() {
       </nav>
 
       <div className="mt-auto p-3 glass rounded-xl text-sm">
-        <div className="font-semibold truncate">{user?.email}</div>
+        <div className="flex items-center justify-between gap-2">
+          <div className="font-semibold truncate">{user?.email}</div>
+          <RemindersCenter />
+        </div>
         <Button variant="ghost" size="sm" onClick={signOut} className="w-full justify-start mt-2 text-muted-foreground">
           <LogOut size={16} /> Sair
         </Button>
