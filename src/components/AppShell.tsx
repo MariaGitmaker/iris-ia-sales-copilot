@@ -12,6 +12,7 @@ import { Scripts } from "@/components/views/Scripts";
 import { SettingsView } from "@/components/views/SettingsView";
 import { Training } from "@/components/views/Training";
 import { Channels } from "@/components/views/Channels";
+import { RemindersCenter } from "@/components/RemindersCenter";
 
 type View = "dashboard" | "copilot" | "channels" | "crm" | "scripts" | "training" | "settings";
 
